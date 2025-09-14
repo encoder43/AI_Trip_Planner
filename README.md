@@ -140,7 +140,7 @@ Licensed under the **MIT License**. See `LICENSE` for details.
 
 ## 🙏 Acknowledgements  
 
-- Inspired by **Krish Naik** and **Sunny Savita** tutorials.  
+- To all the beutifull hearts who contributed to open source 
 - Built with the amazing **LangChain + FastAPI** open-source ecosystem.  
 
 ---
