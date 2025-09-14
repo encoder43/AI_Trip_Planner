@@ -7,43 +7,66 @@ import os
 import datetime
 from dotenv import load_dotenv
 from pydantic import BaseModel
+from typing import List, Optional
+
 load_dotenv()
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # set specific origins in prod
+    allow_origins=["*"],  # ⚠️ In production, restrict origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Request model
 class QueryRequest(BaseModel):
-    question: str
+    start_place: str
+    destination: str
+    start_date: str
+    end_date: str
+    budget: float
+    currency: str
+    travelers: int
+    preference: str
+    accommodation: str
+    interests: Optional[List[str]] = []
+
 
 @app.post("/query")
-async def query_travel_agent(query:QueryRequest):
+async def query_travel_agent(query: QueryRequest):
     try:
-        print(query)
+        print("Received Query:", query.dict())
+
+        # Initialize graph
         graph = GraphBuilder(model_provider="groq")
-        react_app=graph()
-        #react_app = graph.build_graph()
+        react_app = graph()   # compiled StateGraph (Option 2)
 
-        png_graph = react_app.get_graph().draw_mermaid_png()
-        with open("my_graph.png", "wb") as f:
-            f.write(png_graph)
+        # Build natural language prompt
+        user_prompt = f"""
+        Plan a trip for {query.travelers} traveler(s) from {query.start_place} to {query.destination}.
+        Dates: {query.start_date} → {query.end_date}.
+        Budget: {query.budget} {query.currency}.
+        Travel style: {query.preference}.
+        Accommodation preference: {query.accommodation}.
+        Special interests: {", ".join(query.interests) if query.interests else "None"}.
+        """
 
-        print(f"Graph saved as 'my_graph.png' in {os.getcwd()}")
-        # Assuming request is a pydantic object like: {"question": "your text"}
-        messages={"messages": [query.question]}
-        output = react_app.invoke(messages)
+        # Messages format for the graph
+        messages = {"messages": [user_prompt]}
 
-        # If result is dict with messages:
+        # Run the graph
+        output = await react_app.ainvoke(messages)  # 👈 async call since you're inside FastAPI
+
+        # Extract final response
         if isinstance(output, dict) and "messages" in output:
-            final_output = output["messages"][-1].content  # Last AI response
+            final_output = output["messages"][-1].content
         else:
             final_output = str(output)
-        
+
         return {"answer": final_output}
+
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
