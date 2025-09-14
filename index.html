@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Travel Planner Pro ✈️</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        /* --- Main Body & Background --- */
+        :root {
+            --primary-glow: rgba(13, 110, 253, 0.5);
+            --secondary-glow: rgba(111, 66, 193, 0.5);
+        }
+
+        body {
+            background-image: url('https://images.unsplash.com/photo-1507525428034-b723a9ce6890?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            transition: background-image 1.5s ease-in-out;
+            overflow-x: hidden;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .background-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: -1;
+        }
+
+        /* --- Glassmorphism Form Container --- */
+        .planner-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        /* --- Form Elements (No changes) --- */
+        .form-label { color: #fff; font-weight: 500; }
+        .form-control, .form-select {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            color: #fff !important;
+            border-radius: 10px;
+        }
+        .form-control::placeholder { color: #ccc; }
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 10px var(--primary-glow);
+            background-color: rgba(255, 255, 255, 0.2) !important;
+        }
+        .input-group-text {
+            background-color: transparent !important;
+            border: none !important; color: #fff;
+        }
+        .form-check-label { color: #fff; }
+        .form-check-input {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .form-check-input:checked {
+            background-color: #0d6efd !important;
+            border-color: #0d6efd !important;
+        }
+        select option { background: #343a40; }
+
+        /* --- Submit Button (No changes) --- */
+        .btn-submit {
+            background: linear-gradient(45deg, var(--primary-glow), var(--secondary-glow));
+            border: none; font-weight: bold;
+            padding: 12px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+        /* --- Result Card Styling --- */
+        #resultCard {
+            background: #ffffff;
+            color: #333;
+        }
+        /* --- NEW STYLES for MARKDOWN-GENERATED CONTENT --- */
+        #planContent h1, #planContent h2, #planContent h3, #planContent h4, #planContent h5 {
+            color: #0d6efd;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        #planContent table {
+            width: 100%;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        /* Make generated tables look like Bootstrap tables */
+        #planContent table {
+            --bs-table-color: var(--bs-body-color);
+            --bs-table-bg: transparent;
+            --bs-table-border-color: var(--bs-border-color);
+            --bs-table-accent-bg: transparent;
+            --bs-table-striped-color: var(--bs-body-color);
+            --bs-table-striped-bg: rgba(0, 0, 0, 0.05);
+            --bs-table-active-color: var(--bs-body-color);
+            --bs-table-active-bg: rgba(0, 0, 0, 0.1);
+            --bs-table-hover-color: var(--bs-body-color);
+            --bs-table-hover-bg: rgba(0, 0, 0, 0.075);
+            border-color: var(--bs-border-color);
+            border-collapse: collapse;
+        }
+        #planContent th, #planContent td {
+            padding: 0.75rem;
+            vertical-align: top;
+            border-top: 1px solid var(--bs-border-color);
+        }
+        #planContent thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid var(--bs-border-color);
+        }
+         #planContent tbody tr:nth-of-type(odd) {
+            background-color: var(--bs-table-striped-bg);
+        }
+        #planContent hr {
+            margin: 2rem 0;
+        }
+
+        /* --- Airplane Animation (No changes) --- */
+        .airplane {
+            position: fixed; font-size: 1.5rem; color: rgba(255, 255, 255, 0.7);
+            z-index: -1; pointer-events: none; animation: fly linear infinite;
+        }
+        @keyframes fly {
+            0% { transform: translateX(-150px) translateY(0px) rotate(-15deg); opacity: 0.7; }
+            100% { transform: translateX(110vw) translateY(-150px) rotate(10deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background-overlay"></div>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-danger text-white">
+                <strong class="me-auto"><i class="bi bi-exclamation-triangle-fill"></i> Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body"></div>
+        </div>
+    </div>
+
+    <main class="container d-flex flex-column justify-content-center min-vh-100 py-5">
+        <div class="planner-container p-4 p-md-5 mx-auto" style="max-width: 900px; width: 100%;">
+            <header class="text-center mb-4">
+                <h1 class="text-white fw-bold">AI Travel Planner Pro</h1>
+                <p class="text-white-50">Craft your next adventure with the power of AI.</p>
+            </header>
+            
+            <form id="travelForm" class="needs-validation" novalidate>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="start_place" class="form-label">From</label>
+                        <div class="input-group"><span class="input-group-text"><i class="bi bi-send"></i></span><input type="text" class="form-control" id="start_place" placeholder="e.g., Mumbai" required></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="destination" class="form-label">To</label>
+                        <div class="input-group"><span class="input-group-text"><i class="bi bi-geo-alt-fill"></i></span><input type="text" class="form-control" id="destination" placeholder="e.g., Goa" required></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="start_date" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="end_date" required>
+                        <div class="invalid-feedback text-white">End date must be after start date.</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="travelers" class="form-label">Travelers</label>
+                        <div class="input-group"><span class="input-group-text"><i class="bi bi-people-fill"></i></span><input type="number" class="form-control" id="travelers" min="1" value="1" required></div>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="budget" class="form-label">Budget</label>
+                        <input type="number" class="form-control" id="budget" placeholder="e.g., 20000" min="100" step="50">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="currency" class="form-label">Currency</label>
+                        <select class="form-select" id="currency"></select>
+                    </div>
+                    <div class="col-12"><hr class="border-light"></div>
+                    <div class="col-md-6">
+                        <label for="travel_style" class="form-label">Travel Style</label>
+                        <select class="form-select" id="travel_style">
+                            <option>Balanced</option><option>Luxury</option><option>Budget</option><option>Adventure</option><option>Cultural</option><option>Relaxation</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="accommodation" class="form-label">Accommodation</label>
+                        <select class="form-select" id="accommodation">
+                            <option>Hotel</option><option>Hostel</option><option>Resort</option><option>Airbnb</option><option>Guesthouse</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                         <label class="form-label">Special Interests</label>
+                         <div class="row gx-3 gy-2">
+                             <div class="col-6 col-md-4 form-check ps-4"><input class="form-check-input" type="checkbox" value="Beaches" id="interestBeaches"><label class="form-check-label" for="interestBeaches">Beaches 🏖️</label></div>
+                             <div class="col-6 col-md-4 form-check ps-4"><input class="form-check-input" type="checkbox" value="Mountains" id="interestMountains"><label class="form-check-label" for="interestMountains">Mountains ⛰️</label></div>
+                             <div class="col-6 col-md-4 form-check ps-4"><input class="form-check-input" type="checkbox" value="History" id="interestHistory"><label class="form-check-label" for="interestHistory">History 📜</label></div>
+                             <div class="col-6 col-md-4 form-check ps-4"><input class="form-check-input" type="checkbox" value="Food" id="interestFood"><label class="form-check-label" for="interestFood">Food 🍴</label></div>
+                             <div class="col-6 col-md-4 form-check ps-4"><input class="form-check-input" type="checkbox" value="Nightlife" id="interestNightlife"><label class="form-check-label" for="interestNightlife">Nightlife 🌃</label></div>
+                             <div class="col-6 col-md-4 form-check ps-4"><input class="form-check-input" type="checkbox" value="Wildlife" id="interestWildlife"><label class="form-check-label" for="interestWildlife">Wildlife 🦁</label></div>
+                         </div>
+                    </div>
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-primary w-100 btn-submit" id="submitButton"><i class="bi bi-magic"></i> Generate My Itinerary</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <div id="resultCard" class="card mt-4 p-4 p-md-5 d-none mx-auto" style="max-width: 900px; width: 100%;">
+            <div id="loadingSpinner" class="text-center">
+                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+                <p class="mt-3 lead">Our AI is crafting your personalized adventure...</p>
+            </div>
+            <div id="planContent"></div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // All the setup and helper functions are unchanged...
+            const form = document.getElementById('travelForm');
+            const destinationInput = document.getElementById('destination');
+            const currencySelect = document.getElementById('currency');
+            const resultCard = document.getElementById('resultCard');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const planContent = document.getElementById('planContent');
+            const submitButton = document.getElementById('submitButton');
+            const errorToastEl = document.getElementById('errorToast');
+            const errorToast = new bootstrap.Toast(errorToastEl);
+            const BASE_URL = "https://ai-trip-planner-ipk7.onrender.com";
+
+            // const startBackgroundSlideshow = () => { /* ... unchanged ... */ };
+            // const createAirplane = () => { /* ... unchanged ... */ };
+            const startAirplaneAnimations = () => { /* ... unchanged ... */ };
+            const showToast = (message) => {
+                errorToastEl.querySelector('.toast-body').textContent = message;
+                errorToast.show();
+            };
+            const loadCurrencies = async () => {
+                try {
+                    const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    const data = await response.json();
+                    const commonCurrencies = ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'INR'];
+                    currencySelect.innerHTML = commonCurrencies
+                        .filter(code => data.rates[code])
+                        .map(code => `<option value="${code}">${code}</option>`)
+                        .join('');
+                    currencySelect.value = 'INR';
+                } catch (error) {
+                    console.error("Failed to load currencies:", error);
+                    showToast("Could not load currency rates. Using fallback options.");
+                    currencySelect.innerHTML = "<option>USD</option><option>INR</option><option>EUR</option>";
+                }
+            };
+            
+            // --- *** REWRITTEN & SIMPLIFIED DISPLAY LOGIC *** ---
+            const displayPlan = (markdownText) => {
+                // Use the marked.js library to convert the entire Markdown text to HTML
+                const htmlContent = marked.parse(markdownText);
+                planContent.innerHTML = htmlContent;
+            };
+            
+            // --- EVENT HANDLERS (UNCHANGED) ---
+            let debounceTimer;
+            destinationInput.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    const query = destinationInput.value.trim();
+                    if (query) {
+                        const unsplashUrl = `https://source.unsplash.com/1920x1080/?${encodeURIComponent(query)},travel`;
+                        const img = new Image();
+                        img.src = unsplashUrl;
+                        img.onload = () => document.body.style.backgroundImage = `url('${unsplashUrl}')`;
+                    }
+                }, 1000);
+            });
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const startDateInput = document.getElementById('start_date');
+                const endDateInput = document.getElementById('end_date');
+                if (endDateInput.value && startDateInput.value && new Date(endDateInput.value) < new Date(startDateInput.value)) {
+                    endDateInput.classList.add('is-invalid');
+                    return;
+                }
+                endDateInput.classList.remove('is-invalid');
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    return;
+                }
+                form.classList.add('was-validated');
+
+                resultCard.classList.remove('d-none');
+                loadingSpinner.classList.remove('d-none');
+                planContent.innerHTML = '';
+                submitButton.disabled = true;
+                submitButton.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Generating...`;
+                resultCard.scrollIntoView({ behavior: 'smooth' });
+
+                const payload = {
+                    start_place: document.getElementById('start_place').value,
+                    destination: document.getElementById('destination').value,
+                    start_date: startDateInput.value,
+                    end_date: endDateInput.value,
+                    budget: parseInt(document.getElementById('budget').value),
+                    currency: document.getElementById('currency').value,
+                    travelers: parseInt(document.getElementById('travelers').value),
+                    preference: document.getElementById('travel_style').value,
+                    accommodation: document.getElementById('accommodation').value,
+                    interests: Array.from(document.querySelectorAll('input[type=checkbox]:checked')).map(cb => cb.value)
+                };
+
+                try {
+                    const response = await fetch(`${BASE_URL}/query`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await response.json();
+                    loadingSpinner.classList.add('d-none');
+
+                    if (response.ok) {
+                        displayPlan(data.answer);
+                    } else {
+                        const errorMsg = data.error || 'An unknown error occurred.';
+                        planContent.innerHTML = `<p class="text-danger">Bot failed to respond: ${errorMsg}</p>`;
+                        showToast(`Bot failed to respond: ${errorMsg}`);
+                    }
+                } catch (error) {
+                    loadingSpinner.classList.add('d-none');
+                    planContent.innerHTML = `<p class="text-danger">Request failed: ${error.message}</p>`;
+                    showToast(`Request failed: ${error.message}`);
+                } finally {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = `<i class="bi bi-magic"></i> Generate My Itinerary`;
+                }
+            });
+
+            // --- INITIALIZATION ---
+            // These are hidden for brevity, they are the same as before
+            const startBackgroundSlideshow = () => { setInterval(() => { currentImageIndex = (currentImageIndex + 1) % backgroundImages.length; document.body.style.backgroundImage = `url('${backgroundImages[currentImageIndex]}')`; }, 7000); };
+            const createAirplane = () => { const airplane = document.createElement('div'); airplane.className = 'airplane'; airplane.innerHTML = '✈️'; const startY = Math.random() * window.innerHeight * 0.8; const duration = Math.random() * 8 + 12; airplane.style.top = `${startY}px`; airplane.style.animationDuration = `${duration}s`; document.body.appendChild(airplane); setTimeout(() => airplane.remove(), duration * 1000); };
+            const backgroundImages = [ 'https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop', 'https://images.unsplash.com/photo-1528181304800-259b08848526?q=80&w=2070&auto=format&fit=crop', 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070&auto=format&fit=crop', 'https://images.unsplash.com/photo-1507525428034-b723a9ce6890?q=80&w=2070&auto=format&fit=crop' ];
+            let currentImageIndex = 0;
+            
+            startBackgroundSlideshow();
+            setInterval(createAirplane, 3500);
+            loadCurrencies();
+        });
+    </script>
+</body>
+</html>
